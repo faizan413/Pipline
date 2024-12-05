@@ -1,19 +1,31 @@
 pipeline {
     agent any
-
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Repository') {
             steps {
-                git 'https://github.com/faizan413/Pipline'
+                git credentialsId: '781f092e-b36a-4435-bdfb-2f9129f96e61', url: 'https://github.com/faizan413/Pipline'
             }
         }
-
         stage('Setup Environment') {
             steps {
-                sh 'python3 -m venv env'
-                sh 'source env/bin/activate && pip install -r requirements.txt'
+                script {
+                    // Ensure python3-venv is installed
+                    sh '''
+                        if ! dpkg -l | grep -q python3-venv; then
+                            sudo apt update
+                            sudo apt install -y python3-venv
+                        fi
+                        python3 -m venv env
+                        . env/bin/activate  # Use dot instead of source
+                        pip install -r requirements.txt
+                    '''
+                }
             }
         }
+        // Other stages like Data Preparation, Model Training, etc.
+    
+
+
 
         stage('Data Preparation') {
             steps {
